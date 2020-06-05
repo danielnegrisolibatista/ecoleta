@@ -1,10 +1,9 @@
 
-
 # Projeto Ecoleta
 
-## Aula I - Iniciando o projeto
+## Iniciando o projeto
 
-### Projeto Server (Backend)
+### Projeto Server
 
 - Criar a pasta server
 - Iniciar um projeto node com `npm init -y`
@@ -19,7 +18,6 @@
 - Instalar o livereload de código `npm install ts-node-dev - D`
 - Alterar o package.json inserindo o script dev `ts-node src/server.ts`
 - Usar `npm run dev` para executar a aplicação
-
 
 ### Rota básica no Projeto Server (Backend)
 
@@ -329,7 +327,7 @@ routes.post('/points', async (request, response) => {
     name,
     email,
     whatsapp,
-    latitute,
+    latitude,
     longitude,
     uf,
     city,
@@ -343,7 +341,7 @@ routes.post('/points', async (request, response) => {
     name, // shortname
     email,
     whatsapp,
-    latitute,
+    latitude,
     longitude,
     uf,
     city
@@ -423,7 +421,7 @@ class PointsControllers {
       name,
       email,
       whatsapp,
-      latitute,
+      latitude,
       longitude,
       uf,
       city,
@@ -437,7 +435,7 @@ class PointsControllers {
       name, // shortname
       email,
       whatsapp,
-      latitute,
+      latitude,
       longitude,
       uf,
       city

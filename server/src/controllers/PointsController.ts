@@ -46,7 +46,7 @@ class PointsControllers {
       name,
       email,
       whatsapp,
-      latitute,
+      latitude,
       longitude,
       uf,
       city,
@@ -60,7 +60,7 @@ class PointsControllers {
       name, // shortname
       email,
       whatsapp,
-      latitute,
+      latitude,
       longitude,
       uf,
       city
