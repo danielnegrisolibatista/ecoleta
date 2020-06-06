@@ -1,9 +1,9 @@
 
 # Projeto Ecoleta
 
-## Iniciando o projeto
+## Projeto Server
 
-### Projeto Server
+### Iniciando o projeto
 
 - Criar a pasta server
 - Iniciar um projeto node com `npm init -y`
