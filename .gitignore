@@ -1,4 +1,7 @@
 node_modules
+uploads/*
+!uploads/.gitkeep
+*.sqllite
 build
 
 .DS_Store

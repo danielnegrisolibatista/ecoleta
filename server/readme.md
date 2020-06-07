@@ -539,3 +539,209 @@ app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
 app.listen(3333);
 ```
+
+### Implementando upload de imagens
+
+- Instalar o Multer na aplicação `npm install multer` para gerenciar uploads
+- Instalar a tipagem do Multer `npm install @types/multer -D`
+- [TODO] Implementar o fileFilter para filtrar extensão e tamanho do arquivo
+- Criar a pasta src/config
+- Criar o arquivo src/config/multer.ts
+
+```javascript
+// config/multer.ts
+
+import multer from 'multer';
+import path from 'path';
+import crypto from 'crypto';
+
+export default {
+  storage: multer.diskStorage({
+    destination: path.resolve(__dirname, '..', '..', 'uploads'),
+    filename(request, file, callback) {
+      const hash = crypto.randomBytes(6).toString('hex');
+
+      const fileName = `${hash}-${file.originalname}`;
+
+      callback(null, fileName);
+    }
+  })
+};
+```
+
+- Alterar o arquivo routes.ts para adicionar o multer
+
+```javascript
+// routes.ts
+
+import express, { response } from 'express';
+
+import multer from 'multer';
+import multerConfig from './config/multer'
+
+import PointsController from './controllers/PointsController'
+import ItemsController from './controllers/ItemsController'
+
+const routes = express.Router();
+const upload = multer(multerConfig);
+
+const pointsController = new PointsController();
+const itemsController = new ItemsController();
+
+routes.get('/items', itemsController.index);
+routes.get('/points', pointsController.index);
+routes.get('/points/:id', pointsController.show);
+
+// adicionando upload como parametro antes da chamada do método
+routes.post('/points', upload.single('image'), pointsController.create);
+
+export default routes;
+```
+
+- Alterar o arquivo PointsController.ts para inserir a image_url
+
+```javascript
+// PointsController.ts
+
+import { Request, Response } from 'express';
+import knex from '../database/connections';
+
+// // index, show, create, upadt, delete
+class PointsControllers {
+  async index(request: Request, response: Response) {
+    const { city, uf, items } = request.query;
+
+    const parserItems = String(items)
+      .split(',')
+      .map(item => Number(item.trim()));
+
+    const points = await knex('points')
+      .join('point_items', 'points.id', '=', 'point_items.point_id')
+      .whereIn('point_items.item_id', parserItems)
+      .where('city', String(city))
+      .where('uf', String(uf))
+      .distinct()
+      .select('points.*');
+
+    const serializedPoints = points.map(point => {
+      return {
+        ...point,
+        image_url: `http://192.168.0.105:3333/uploads/${point.image}`
+      }
+    });
+
+    response.status(200).json(serializedPoints);
+  }
+
+  async show(request: Request, response: Response) {
+    const { id } = request.params;
+
+    const point = await knex('points').where('id', id).first();
+
+    if (!point) {
+      return response.status(400).json( { message: 'Point not found'});
+    }
+
+    const serializedPoint = {
+      ...point,
+      image_url: `http://192.168.0.105:3333/uploads/${point.image}`
+    }
+
+    const items = await knex('items')
+      .join('point_items', 'items.id', '=', 'point_items.item_id')
+      .where('point_items.point_id', id)
+      .select('items.title')
+
+    return response.status(200).json(
+      {
+        point: serializedPoint,
+        items
+      }
+    );
+  }
+
+  async create(request: Request, response: Response) {
+    const { // desestruturação
+      name,
+      email,
+      whatsapp,
+      latitude,
+      longitude,
+      uf,
+      city,
+      items
+    } = request.body
+  
+    const trx = await knex.transaction(); // habilita operação de transação no knex
+  
+    const point = {
+      image: request.file.filename,
+      name, // shortname
+      email,
+      whatsapp,
+      latitude,
+      longitude,
+      uf,
+      city
+    };
+
+    const insertIds = await trx('points').insert(point);
+  
+    const point_id = insertIds[0]
+  
+    const pointItems = items
+      .split(',')
+      .map((item: string) => Number(item.trim()))
+      .map((item_id: number) => {
+        return {
+          item_id,
+          point_id
+        }
+    })
+  
+    await trx('point_items').insert(pointItems);
+
+    await trx.commit();
+
+    return response.json({
+      id: point_id,
+      ...point
+    });
+
+  }
+}
+
+export default PointsControllers;
+```
+
+```javascript
+// ItemsController.ts
+
+import knex from '../database/connections';
+import { Request, Response } from 'express';
+
+// index, show, create, upadt, delete
+class ItemsController {
+  async index (request: Request, response: Response) {
+    const items = await knex('items').select('*');
+  
+    const serializedItems = items.map(item => {
+      return {
+        id: item.id,
+        title: item.title,
+        image_url: `http://192.168.0.105:3333/uploads/${item.image}`
+      }
+    });
+  
+    return response.json(serializedItems);
+  }
+}
+
+export default ItemsController;
+```
+
+- Instalar o Celebrate `npm install celebrate` para inserir validações
+- Instalar a tipagem do Joi `npm install @types/hapi__joi - D` para resolver problemas do intelisense com ts
+
+- Alterar o arquivos routes.ts
+
