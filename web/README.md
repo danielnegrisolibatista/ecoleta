@@ -861,10 +861,7 @@ const Dropzone: React.FC<Props> = ({ onFileUploaded }) => {
 
   const onDrop = useCallback(acceptedFiles => {
 
-    // [TODO] TODO BUG -> undefined
     const file = acceptedFiles[0];
-    console.log(file);
-    return;
 
     const fileUrl = URL.createObjectURL(file);
 
@@ -874,7 +871,7 @@ const Dropzone: React.FC<Props> = ({ onFileUploaded }) => {
 
   const {getRootProps, getInputProps} = useDropzone({
     onDrop,
-    accept: 'imagem/*'
+    accept: 'image/*'
   })
 
   return (

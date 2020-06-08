@@ -167,7 +167,7 @@ const CreatePoint = () => {
     data.append('uf', uf);
     data.append('city', city );
     data.append('latitude', String(latitude));
-    data.append('longitude', String() );
+    data.append('longitude', String(longitude) );
     data.append('items', items.join(','));
 
     if (selectedFile) {

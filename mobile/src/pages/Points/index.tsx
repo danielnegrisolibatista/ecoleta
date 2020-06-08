@@ -73,10 +73,6 @@ const Points = () => {
   // carrega os pontos de coleta de acordo com estado e cidade
   // a cada clique em um item de coleta a api é chamada novamente
   useEffect(() => {
-    // console.log(routeParams.city)
-    // console.log(routeParams.uf)
-    // console.log(selectedItems)
-
     api.get('points', {
       params: {
         city: routeParams.city,
@@ -84,7 +80,6 @@ const Points = () => {
         items: selectedItems
       }
     }).then(response => {
-      // console.log(response.data);
       setPoints(response.data);
     })
   }, [selectedItems]);
